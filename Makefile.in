@@ -2,7 +2,7 @@
 
 # This variable defined in the program.
 VERSION = @VERSION@
-CXX = @echo '  g++    $@' && g++
+CXX = g++
 
 # -lstdc++fs — include filesystem library.
 override DEFAULT_FLAGS += -std=c++17 -lstdc++fs
@@ -38,18 +38,19 @@ TEST_SOURCES = $(shell find '$(TEST)' -type f -name '*.cpp')
 OBJECTS = $(SOURCES:$(SRC)/%.cpp=$(OBJ)/%.o)
 # Exclude the main() function of the program, as it interfere
 # with the main() function of tests while linking.
-TEST_OBJECTS = $(TEST_SOURCES:$(TEST)/%.cpp=$(OBJ)/%.test.o) \
-	$(filter-out $(OBJ)/main.o,$(OBJECTS))
+TEST_OBJECTS = $(filter-out $(OBJ)/main.o,$(OBJECTS)) \
+	$(TEST_SOURCES:$(TEST)/%.cpp=$(OBJ)/%.test.o)
+
 
 
 .DEFAULT_GOAL = $(BUILD)/apm
 $(BUILD)/apm: $(OBJECTS)
-	$(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(FLAGS)
+	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(FLAGS)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
 # Create target directory for object.
 	@mkdir -p $(@D)
-	$(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(FLAGS)
+	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(FLAGS)
 
 .PHONY: debug
 debug: .debug-init $(BUILD)/apm
@@ -64,12 +65,12 @@ test: .test-init $(BUILD)/test
 	@echo 'Building tests'
 
 $(BUILD)/test: $(TEST_OBJECTS)
-	$(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(DEBUG_FLAGS)
+	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(DEBUG_FLAGS)
 
 $(OBJ)/%.test.o: $(TEST)/%.cpp
 # Create target directory for test object.
 	@mkdir -p $(@D)
-	$(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(DEBUG_FLAGS)
+	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(DEBUG_FLAGS)
 
 
 # Before build the package recommended compile

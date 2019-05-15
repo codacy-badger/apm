@@ -1,4 +1,5 @@
-![License](https://img.shields.io/github/license/lem0nez/apm.svg)
+[![Build status](https://travis-ci.org/lem0nez/apm.svg?branch=master)](https://travis-ci.org/lem0nez/apm)
+[![License](https://img.shields.io/github/license/lem0nez/apm.svg)](https://github.com/lem0nez/apm/blob/master/LICENSE)
 
 # Android Projects Manager
 **At this moment on development stage!**

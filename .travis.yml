@@ -1,0 +1,26 @@
+language: cpp
+sudo: required
+distro: xenial
+os: linux
+compiler: gcc
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    update: true
+
+    packages:
+      - g++-8
+      - curl
+      - jq
+      - cmake
+      - libpugixml-dev
+      - libcurl4-openssl-dev
+
+install:
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 90
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
+
+script:
+  - ./configure && make libs && make test && build/test

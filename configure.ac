@@ -5,7 +5,7 @@ AC_LANG(C++)
 AC_PROG_CXX
 AC_CONFIG_FILES(Makefile)
 AX_CHECK_COMPILE_FLAG([-lstdc++fs], [], [AC_MSG_ERROR(m4_normalize([
-    Your compiler doesn't provide standard the Filesystem library!
+    Your compiler doesn't provide the standard Filesystem library!
 ]))])
 
 AC_CHECK_PROG(CURL, curl, yes, no)
