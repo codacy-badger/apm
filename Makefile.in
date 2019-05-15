@@ -1,0 +1,89 @@
+-include libs.make
+
+# This variable defined in the program.
+VERSION = @VERSION@
+CXX = @echo '  g++    $@' && g++
+
+# -lstdc++fs — include filesystem library.
+override DEFAULT_FLAGS += -std=c++17 -lstdc++fs
+# Flags for release build (this variable will overwrite on debug build).
+# -DNDEBUG — disable the assert() macros.
+# -s — strip debug symbols.
+# -O3 — enable max number of optimizations for min execution time (slow compilation).
+FLAGS = $(DEFAULT_FLAGS) -DNDEBUG -s -O3
+# -O0 — turn off any optimizations (fast compilation time).
+# -ggdb — compile with debugging symbols for GDB.
+DEBUG_FLAGS = $(DEFAULT_FLAGS) -O0 -ggdb
+
+override DEFINES += -DVERSION=\"$(VERSION)\"
+# Enable all warnings from the compiler.
+override WARNS += -Wall -Wextra -fexceptions
+
+# Relative directories of the project.
+LIB = lib
+BUILD = build
+OBJ = $(BUILD)/obj
+SRC = src
+TEST = test
+
+# This variable use while building libraries.
+# Set threads number equals to number of processor cores, plus 1.
+THREADS = $(shell echo $$(($$(nproc) + 1)))
+
+# Get all source files, including subdirectories.
+SOURCES = $(shell find '$(SRC)' -type f -name '*.cpp')
+TEST_SOURCES = $(shell find '$(TEST)' -type f -name '*.cpp')
+
+# Change destination directory and files extension.
+OBJECTS = $(SOURCES:$(SRC)/%.cpp=$(OBJ)/%.o)
+# Exclude the main() function of the program, as it interfere
+# with the main() function of tests while linking.
+TEST_OBJECTS = $(TEST_SOURCES:$(TEST)/%.cpp=$(OBJ)/%.test.o) \
+	$(filter-out $(OBJ)/main.o,$(OBJECTS))
+
+
+.DEFAULT_GOAL = $(BUILD)/apm
+$(BUILD)/apm: $(OBJECTS)
+	$(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(FLAGS)
+
+$(OBJ)/%.o: $(SRC)/%.cpp
+# Create target directory for object.
+	@mkdir -p $(@D)
+	$(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(FLAGS)
+
+.PHONY: debug
+debug: .debug-init $(BUILD)/apm
+.debug-init:
+	@echo 'Debug build'
+	$(eval FLAGS = $(DEBUG_FLAGS))
+
+
+.PHONY: test
+test: .test-init $(BUILD)/test
+.test-init:
+	@echo 'Building tests'
+
+$(BUILD)/test: $(TEST_OBJECTS)
+	$(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(DEBUG_FLAGS)
+
+$(OBJ)/%.test.o: $(TEST)/%.cpp
+# Create target directory for test object.
+	@mkdir -p $(@D)
+	$(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(DEBUG_FLAGS)
+
+
+# Before build the package recommended compile
+# the project in release mode (if this isn't done).
+.PHONY: @DEB@
+@DEB@: $(BUILD)/apm
+	@scripts/make-deb.sh 'deb'
+
+.PHONY: clean
+clean:
+	@rm -rf autom4te.cache/ $(BUILD) config.log config.status
+
+# This rule also remove downloaded libraries and
+# auto-generated files by "autoreconf" and "./configure".
+.PHONY: full-clean
+full-clean: clean
+	@rm -rf $(LIB) scripts/make-deb.sh aclocal.m4 configure Makefile

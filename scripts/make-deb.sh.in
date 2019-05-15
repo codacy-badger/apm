@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+# Copyright © 2019 Nikita Dudko. All rights reserved.
+# Contacts: <nikita.dudko.95@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eo pipefail
+shopt -s globstar nullglob
+
+TMP_DIR=$(mktemp -dt tmp.make-deb_XXXXXX)
+cleanup() {
+  rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+VERSION='@VERSION@'
+
+
+# First parameter — path to root directory of the package.
+main() {
+  # Compared with output of "arch" command.
+  declare -A archs=(
+    [i386]='i(3|6)86'
+    [amd64]='amd64|x86_64'
+    [armel]='armv[4-6].*'
+    [armhf]='armv7.*'
+    [arm64]='armv8.*|aarch64'
+    [mips]='mips'
+    [mipsel]='mipsel'
+    [mips64]='mips64.*'
+  )
+
+  # Files to compress with gzip.
+  compress_files=(
+    "$TMP_DIR/usr/share/doc/apm/changelog.Debian"
+  )
+
+  if [[ -z $1 ]]; then
+    echo >&2 'Please, specify a root directory of the package!'
+    exit 1
+  fi
+  root=$1
+
+  arch_out=$(arch)
+  for a in "${!archs[@]}"; do
+    if [[ $arch_out =~ (^${archs[$a]}$) ]]; then
+      arch=$a
+      break
+    fi
+  done
+
+  if [[ -z $arch ]]; then
+    echo >&2 "Your CPU architecture ($arch_out) doesn't supported!"
+    exit 1
+  fi
+
+  # Copy with links following.
+  cp -rTL "$root" "$TMP_DIR"
+
+  # Convert all Markdown manual pages to Man format.
+  while read -r md; do
+    man=$(sed -r 's/\.md$//' <<< "$md")
+    pandoc "$md" -st 'man' -o "$man"
+    compress_files+=("$man")
+    rm -f "$md"
+  done <<< "$(find "$TMP_DIR/usr/share/man" -type f -name '*.md')"
+
+  for f in "${compress_files[@]}"; do
+    gzip -n9 "$f"
+  done
+
+  # Remove unnecessary files.
+  find "$TMP_DIR" -type f -name '*.swp' -delete
+
+  # Move to the root directory of the package in subshell and generate checksums.
+  (cd "$TMP_DIR" && find . ! -path './DEBIAN/*' -type f -printf '%P ' | \
+      xargs md5sum > 'DEBIAN/md5sums')
+
+  installed_size=$(du -sB 1024 --exclude="$TMP_DIR/DEBIAN" "$TMP_DIR" | \
+      awk '{print $1}')
+  sed -i -r "s/@VER@/$VERSION/g; s/@ARCH@/$arch/g; s/@SIZE@/$installed_size/g" \
+      "$TMP_DIR/DEBIAN/control"
+
+  pkg="apm_$VERSION-1_$arch.deb"
+  fakeroot dpkg-deb -b "$TMP_DIR" "$pkg"
+  echo "Output file: $pkg."
+
+  if lintian -V &> /dev/null; then
+    lintian -c "$pkg" -j "$(nproc)"
+  fi
+  return 0
+}
+
+main "$@"
