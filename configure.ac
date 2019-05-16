@@ -13,11 +13,6 @@ if test "$CURL" != yes; then
   AC_MSG_ERROR([curl should be installed to download dependencies.])
 fi
 
-AC_CHECK_PROG(JQ, jq, yes, no)
-if test "$JQ" != yes; then
-  AC_MSG_ERROR([jq should be installed to retrieve dependencies.])
-fi
-
 AC_CHECK_PROG(CMAKE, cmake, yes, no)
 if test "$CMAKE" != yes; then
   AC_MSG_ERROR([cmake should be installed to build dependencies.])

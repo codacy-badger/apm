@@ -1,26 +1,72 @@
 language: cpp
+# Run on a virtual machine.
 sudo: required
-distro: xenial
+dist: xenial
 os: linux
-compiler: gcc
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    update: true
+matrix:
+  include:
+    - name: GCC 8
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
 
-    packages:
-      - g++-8
-      - curl
-      - jq
-      - cmake
-      - libpugixml-dev
-      - libcurl4-openssl-dev
+          packages:
+            - g++-8
+            - curl
+            - libpugixml-dev
+            - libcurl4-openssl-dev
+            - pandoc
+            - fakeroot
+            - lintian
 
-install:
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 90
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
+      install:
+        - sudo update-alternatives --install /usr/bin/gcc gcc "/usr/bin/gcc-8" 90
+        - sudo update-alternatives --install /usr/bin/g++ g++ "/usr/bin/g++-8" 90
+
+    - name: Clang 8
+      compiler: clang
+      env: WARNS=-Wno-unused-command-line-argument
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-8
+
+          packages:
+            - clang-8
+            - libstdc++-8-dev
+            - curl
+            - libpugixml-dev
+            - libcurl4-openssl-dev
+            - pandoc
+            - fakeroot
+            - lintian
+
+      install:
+        - sudo update-alternatives --install
+            /usr/local/clang-7.0.0/bin/clang clang "/usr/bin/clang-8" 90
+        - sudo update-alternatives --install
+            /usr/local/clang-7.0.0/bin/clang++ clang++ "/usr/bin/clang++-8" 90
+
+    - name: Clang 7
+      compiler: clang
+      env: WARNS=-Wno-unused-command-line-argument
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+
+          packages:
+            - libstdc++-8-dev
+            - curl
+            - libpugixml-dev
+            - libcurl4-openssl-dev
+            - pandoc
+            - fakeroot
+            - lintian
 
 script:
-  - ./configure && make libs && make test && build/test
+  - ./configure && make -e libs test deb && build/test

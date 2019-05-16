@@ -41,9 +41,14 @@ main() {
     [mips64]='mips64.*'
   )
 
-  # Files to compress with gzip.
+  # Absolute paths to files for compressing with gzip.
   compress_files=(
     "$TMP_DIR/usr/share/doc/apm/changelog.Debian"
+  )
+
+  # Relative paths to executables.
+  exes=(
+    'usr/bin/apm'
   )
 
   if [[ -z $1 ]]; then
@@ -92,9 +97,15 @@ main() {
   sed -i -r "s/@VER@/$VERSION/g; s/@ARCH@/$arch/g; s/@SIZE@/$installed_size/g" \
       "$TMP_DIR/DEBIAN/control"
 
+  find "$TMP_DIR" -type d -exec chmod 755 {} \;
+  find "$TMP_DIR" -type f -exec chmod 644 {} \;
+
+  for e in "${exes[@]}"; do
+    chmod +x "$TMP_DIR/$e"
+  done
+
   pkg="apm_$VERSION-1_$arch.deb"
   fakeroot dpkg-deb -b "$TMP_DIR" "$pkg"
-  echo "Output file: $pkg."
 
   if lintian -V &> /dev/null; then
     lintian -c "$pkg" -j "$(nproc)"

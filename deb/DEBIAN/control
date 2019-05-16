@@ -7,7 +7,6 @@ Installed-Size: @SIZE@
 Depends: libc6, libcurl5, libpugixml1v5, openjdk-8-jdk-headless
 Maintainer: Nikita Dudko <nikita.dudko.95@gmail.com>
 Homepage: https://github.com/lem0nez/apm
-X-Source: https://github.com/lem0nez/apm/tarball/v@VER@.tar.gz
 Description: Android Projects Manager.
  The fast and easy to use manager, which primarily aimed
  on mobile devices. It supports most popular CPU

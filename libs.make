@@ -12,14 +12,13 @@ override LDFLAGS += $(addprefix -L,$(wildcard $(LIB)/*/lib))
 override LDLIBS += -lcurl -lcurlpp -lpugixml
 
 # First parameter — GitHub user/repo,
-# second — remote file path,
-# third — reference,
+# second — reference,
+# third — remote file path,
 # fourth — output file path.
 define get_header_only_lib
 	@echo 'Retrieving header-only library $(1)...'
 	@mkdir -p '$(dir $(4))'
-	@curl -o $(4) -sL "$$(curl -sL 'https://api.github.com/repos/$(1)/contents/$(2)?ref=$(3)' | \
-		jq -r .download_url)"
+	@curl -o $(4) -sL 'https://raw.githubusercontent.com/$(1)/$(2)/$(3)'
 endef
 
 # First parameter — GitHub user/repo,
@@ -50,14 +49,14 @@ curlpp:
 	@rm -rf '$(LIB)/.$(CURLPP).tmp'
 
 catch2:
-	$(call get_header_only_lib,catchorg/Catch2,single_include/catch2/catch.hpp,v2.7.2,$\
+	$(call get_header_only_lib,catchorg/Catch2,v2.7.2,single_include/catch2/catch.hpp,$\
 		$(LIB)/$(CATCH2)/include/catch2.hpp)
 cxxopts:
-	$(call get_header_only_lib,jarro2783/cxxopts,include/cxxopts.hpp,v2.1.2,$\
+	$(call get_header_only_lib,jarro2783/cxxopts,v2.1.2,include/cxxopts.hpp,$\
 		$(LIB)/$(CXXOPTS)/include/cxxopts.hpp)
 procxx:
-	$(call get_header_only_lib,skystrife/procxx,include/process.h,master,$\
+	$(call get_header_only_lib,skystrife/procxx,master,include/process.h,$\
 		$(LIB)/$(PROCXX)/include/procxx.hpp)
 ctre:
 	$(call get_header_only_lib,hanickadot/compile-time-regular-expressions,$\
-		single-header/ctre.hpp,v2.6.4,$(LIB)/$(CTRE)/include/ctre.hpp)
+		v2.6.4,single-header/ctre.hpp,$(LIB)/$(CTRE)/include/ctre.hpp)
