@@ -27,7 +27,7 @@ trap cleanup EXIT
 VERSION='@VERSION@'
 
 
-# First parameter — path to root directory of the package.
+# First parameter — root directory of the package.
 main() {
   # Compared with output of "arch" command.
   declare -A archs=(
