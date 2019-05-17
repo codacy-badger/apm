@@ -1,13 +1,16 @@
 language: cpp
 # Run on a virtual machine.
 sudo: required
-dist: xenial
 os: linux
+dist: xenial
+env: CODECOV_TOKEN=25c4c4ca-243d-4e1d-a64c-832b6f3a735b
 
 matrix:
   include:
     - name: GCC 8
       compiler: gcc
+      # Include instruments for coverage analysis.
+      env: DEFAULT_FLAGS=--coverage
       addons:
         apt:
           sources:
@@ -15,7 +18,6 @@ matrix:
 
           packages:
             - g++-8
-            - curl
             - libpugixml-dev
             - libcurl4-openssl-dev
             - pandoc
@@ -25,6 +27,17 @@ matrix:
       install:
         - sudo update-alternatives --install /usr/bin/gcc gcc "/usr/bin/gcc-8" 90
         - sudo update-alternatives --install /usr/bin/g++ g++ "/usr/bin/g++-8" 90
+
+        - curl -o- -sL 'https://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz' | tar -xz
+        - sudo make -C lcov-1.14 install
+
+      after_success:
+        # Generate coverage info.
+        - lcov -c --gcov-tool gcov-8 -d 'build' -o 'build/coverage.info'
+        # Include source files for analysis only from the src/ directory.
+        - lcov -e 'build/coverage.info' "$(pwd)/src/*" -o 'build/coverage.info'
+        # Upload the report.
+        - bash <(curl -sL 'https://codecov.io/bash') -f 'build/coverage.info'
 
     - name: Clang 8
       compiler: clang
@@ -36,16 +49,15 @@ matrix:
             - llvm-toolchain-xenial-8
 
           packages:
-            - clang-8
             - libstdc++-8-dev
-            - curl
+            - clang-8
             - libpugixml-dev
             - libcurl4-openssl-dev
             - pandoc
             - fakeroot
             - lintian
 
-      install:
+      before_install:
         - sudo update-alternatives --install
             /usr/local/clang-7.0.0/bin/clang clang "/usr/bin/clang-8" 90
         - sudo update-alternatives --install
@@ -61,7 +73,6 @@ matrix:
 
           packages:
             - libstdc++-8-dev
-            - curl
             - libpugixml-dev
             - libcurl4-openssl-dev
             - pandoc
@@ -69,4 +80,7 @@ matrix:
             - lintian
 
 script:
-  - ./configure && make -e libs test deb && build/test
+  # -e — preferably use environment variables.
+  # Empty the DEFAULT_FLAGS variable for clean release build.
+  - ./configure && make DEFAULT_FLAGS= -e libs deb
+  - make -e clean debug test && build/test

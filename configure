@@ -592,7 +592,6 @@ FAKEROOT
 GZIP
 PANDOC
 CMAKE
-JQ
 CURL
 OBJEXT
 EXEEXT
@@ -2345,7 +2344,7 @@ $as_echo "$ax_cv_check_cxxflags___lstdcppfs" >&6; }
 if test "x$ax_cv_check_cxxflags___lstdcppfs" = xyes; then :
   :
 else
-  as_fn_error $? "Your compiler doesn't provide standard the Filesystem library!" "$LINENO" 5
+  as_fn_error $? "Your compiler doesn't provide the standard Filesystem library!" "$LINENO" 5
 fi
 
 
@@ -2389,48 +2388,6 @@ fi
 
 if test "$CURL" != yes; then
   as_fn_error $? "curl should be installed to download dependencies." "$LINENO" 5
-fi
-
-# Extract the first word of "jq", so it can be a program name with args.
-set dummy jq; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_JQ+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$JQ"; then
-  ac_cv_prog_JQ="$JQ" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_JQ="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_JQ" && ac_cv_prog_JQ="no"
-fi
-fi
-JQ=$ac_cv_prog_JQ
-if test -n "$JQ"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $JQ" >&5
-$as_echo "$JQ" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-if test "$JQ" != yes; then
-  as_fn_error $? "jq should be installed to retrieve dependencies." "$LINENO" 5
 fi
 
 # Extract the first word of "cmake", so it can be a program name with args.
