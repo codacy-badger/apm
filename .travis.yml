@@ -3,6 +3,9 @@ language: cpp
 sudo: required
 os: linux
 dist: xenial
+
+env: LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+env: THREADS=3
 env: CODECOV_TOKEN=25c4c4ca-243d-4e1d-a64c-832b6f3a735b
 
 matrix:
@@ -17,6 +20,8 @@ matrix:
             - ubuntu-toolchain-r-test
 
           packages:
+            - autoconf
+            - autoconf-archive
             - g++-8
             - libpugixml-dev
             - libcurl4-openssl-dev
@@ -49,6 +54,8 @@ matrix:
             - llvm-toolchain-xenial-8
 
           packages:
+            - autoconf
+            - autoconf-archive
             - libstdc++-8-dev
             - clang-8
             - libpugixml-dev
@@ -72,6 +79,8 @@ matrix:
             - ubuntu-toolchain-r-test
 
           packages:
+            - autoconf
+            - autoconf-archive
             - libstdc++-8-dev
             - libpugixml-dev
             - libcurl4-openssl-dev
@@ -79,8 +88,26 @@ matrix:
             - fakeroot
             - lintian
 
+before_script:
+  - mkdir lib && cd lib
+
+  # Build tiny-process-library.
+  - curl -o- -sL
+      'https://gitlab.com/eidheim/tiny-process-library/-/archive/v2.0.0/tiny-process-library-v2.0.0.tar' | tar -x
+  - cd tiny-process-library-v2.0.0 && cmake .
+  - make -j$THREADS && sudo make install && cd ..
+
+  # Build curlpp.
+  - curl -o- -sL
+      'https://github.com/jpbarrette/curlpp/archive/v0.8.1.tar.gz' | tar -xz
+  - cd curlpp-0.8.1 && cmake . && make -j$THREADS && sudo make install && cd ..
+
+  - cd "$TRAVIS_BUILD_DIR"
+  # Create links to shared libraries.
+  - sudo ldconfig
+
 script:
   # -e — preferably use environment variables.
   # Empty the DEFAULT_FLAGS variable for clean release build.
-  - ./configure && make DEFAULT_FLAGS= -e libs deb
-  - make -e clean debug test && build/test
+  - autoreconf -fi && ./configure && make DEFAULT_FLAGS= -ej$(THREADS) libs deb
+  - make -ej$(THREADS) clean debug test && build/test

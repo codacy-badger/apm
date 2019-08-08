@@ -591,7 +591,6 @@ DPKG_DEB
 FAKEROOT
 GZIP
 PANDOC
-CMAKE
 CURL
 OBJEXT
 EXEEXT
@@ -2390,46 +2389,86 @@ if test "$CURL" != yes; then
   as_fn_error $? "curl should be installed to download dependencies." "$LINENO" 5
 fi
 
-# Extract the first word of "cmake", so it can be a program name with args.
-set dummy cmake; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CMAKE+:} false; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lcurlpp" >&5
+$as_echo_n "checking for main in -lcurlpp... " >&6; }
+if ${ac_cv_lib_curlpp_main+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$CMAKE"; then
-  ac_cv_prog_CMAKE="$CMAKE" # Let the user override the test.
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcurlpp  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_curlpp_main=yes
 else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CMAKE="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
+  ac_cv_lib_curlpp_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_curlpp_main" >&5
+$as_echo "$ac_cv_lib_curlpp_main" >&6; }
+if test "x$ac_cv_lib_curlpp_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCURLPP 1
+_ACEOF
 
-  test -z "$ac_cv_prog_CMAKE" && ac_cv_prog_CMAKE="no"
-fi
-fi
-CMAKE=$ac_cv_prog_CMAKE
-if test -n "$CMAKE"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CMAKE" >&5
-$as_echo "$CMAKE" >&6; }
+  LIBS="-lcurlpp $LIBS"
+
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
+  as_fn_error $? "curlpp library by jpbarrette didn't find!" "$LINENO" 5
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ltiny-process-library" >&5
+$as_echo_n "checking for main in -ltiny-process-library... " >&6; }
+if ${ac_cv_lib_tiny_process_library_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ltiny-process-library  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-if test "$CMAKE" != yes; then
-  as_fn_error $? "cmake should be installed to build dependencies." "$LINENO" 5
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_tiny_process_library_main=yes
+else
+  ac_cv_lib_tiny_process_library_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tiny_process_library_main" >&5
+$as_echo "$ac_cv_lib_tiny_process_library_main" >&6; }
+if test "x$ac_cv_lib_tiny_process_library_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBTINY_PROCESS_LIBRARY 1
+_ACEOF
+
+  LIBS="-ltiny-process-library $LIBS"
+
+else
+  as_fn_error $? "tiny-process-library by eidheim didn't find!" "$LINENO" 5
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lpugixml" >&5
@@ -2470,48 +2509,7 @@ _ACEOF
   LIBS="-lpugixml $LIBS"
 
 else
-  as_fn_error $? "pugixml library (libpugixml-dev) didn't find!" "$LINENO" 5
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lcurl" >&5
-$as_echo_n "checking for main in -lcurl... " >&6; }
-if ${ac_cv_lib_curl_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcurl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_curl_main=yes
-else
-  ac_cv_lib_curl_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_curl_main" >&5
-$as_echo "$ac_cv_lib_curl_main" >&6; }
-if test "x$ac_cv_lib_curl_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBCURL 1
-_ACEOF
-
-  LIBS="-lcurl $LIBS"
-
-else
-  as_fn_error $? "curl library (libcurl4-openssl-dev) didn't find!" "$LINENO" 5
+  as_fn_error $? "pugixml library didn't find!" "$LINENO" 5
 fi
 
 
@@ -3844,5 +3842,3 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: Now build dependencies: make libs." >&5
-$as_echo "$as_me: Now build dependencies: make libs." >&6;}

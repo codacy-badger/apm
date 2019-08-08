@@ -13,15 +13,10 @@ if test "$CURL" != yes; then
   AC_MSG_ERROR([curl should be installed to download dependencies.])
 fi
 
-AC_CHECK_PROG(CMAKE, cmake, yes, no)
-if test "$CMAKE" != yes; then
-  AC_MSG_ERROR([cmake should be installed to build dependencies.])
-fi
-
-AC_CHECK_LIB(pugixml, main, [],
-    [AC_MSG_ERROR([pugixml library (libpugixml-dev) didn't find!])])
-AC_CHECK_LIB(curl, main, [],
-    [AC_MSG_ERROR([curl library (libcurl4-openssl-dev) didn't find!])])
+AC_CHECK_LIB(curlpp, main, [], [AC_MSG_ERROR([curlpp library by jpbarrette didn't find!])])
+AC_CHECK_LIB(tiny-process-library, main, [],
+    [AC_MSG_ERROR([tiny-process-library by eidheim didn't find!])])
+AC_CHECK_LIB(pugixml, main, [], [AC_MSG_ERROR([pugixml library didn't find!])])
 
 AC_MSG_NOTICE([Checking packages needed for build .deb package...])
 AC_CHECK_PROG(PANDOC, pandoc, yes, no)
@@ -43,4 +38,3 @@ else
 fi
 
 AC_OUTPUT
-AC_MSG_NOTICE([Now build dependencies: make libs.])

@@ -28,11 +28,11 @@ TEST = test
 
 # This variable use while building libraries.
 # Set threads number equals to number of processor cores, plus 1.
-THREADS = $(shell echo $$(($$(nproc) + 1)))
+THREADS = $(shell $(UNIX_PREFIX)echo $$(($$(nproc) + 1)))
 
 # Get all source files, including subdirectories.
-SOURCES = $(shell find '$(SRC)' -type f -name '*.cpp')
-TEST_SOURCES = $(shell find '$(TEST)' -type f -name '*.cpp')
+SOURCES = $(shell $(UNIX_PREFIX)find '$(SRC)' -type f -name '*.cpp')
+TEST_SOURCES = $(shell $(UNIX_PREFIX)find '$(TEST)' -type f -name '*.cpp')
 
 # Change destination directory and files extension.
 OBJECTS = $(SOURCES:$(SRC)/%.cpp=$(OBJ)/%.o)
@@ -45,32 +45,41 @@ TEST_OBJECTS = $(filter-out $(OBJ)/main.o,$(OBJECTS)) \
 
 .DEFAULT_GOAL = $(BUILD)/apm
 $(BUILD)/apm: $(OBJECTS)
-	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(FLAGS)
+	@$(UNIX_PREFIX)echo '  $(CXX)    $@'
+	@$(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(FLAGS)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
+ifeq ($(wildcard $(LIB)/*),)
+# If dependencies didn't fetch.
+	$(info Fetching header-only libraries...)
+	@$(MAKE) libs
+endif
 # Create target directory for object.
-	@mkdir -p $(@D)
-	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(FLAGS)
+	@$(UNIX_PREFIX)mkdir -p $(@D)
+	@$(UNIX_PREFIX)echo '  $(CXX)    $@'
+	@$(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(FLAGS)
 
 .PHONY: debug
 debug: .debug-init $(BUILD)/apm
 .debug-init:
-	@echo 'Debug build'
+	$(info Debug build)
 	$(eval FLAGS = $(DEBUG_FLAGS))
 
 
 .PHONY: test
 test: .test-init $(BUILD)/test
 .test-init:
-	@echo 'Building tests'
+	$(info Building tests...)
 
 $(BUILD)/test: $(TEST_OBJECTS)
-	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(DEBUG_FLAGS)
+	@$(UNIX_PREFIX)echo '  $(CXX)    $@'
+	@$(CXX) $(WARNS) $^ -o $@ $(LDFLAGS) $(LDLIBS) $(DEBUG_FLAGS)
 
 $(OBJ)/%.test.o: $(TEST)/%.cpp
 # Create target directory for test object.
-	@mkdir -p $(@D)
-	@echo '  $(CXX)    $@' && $(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(DEBUG_FLAGS)
+	@$(UNIX_PREFIX)mkdir -p $(@D)
+	@$(UNIX_PREFIX)echo '  $(CXX)    $@'
+	@$(CXX) $(WARNS) $(DEFINES) -c $< -o $@ $(CXXFLAGS) $(DEBUG_FLAGS)
 
 
 # Before build the package recommended compile
@@ -78,14 +87,14 @@ $(OBJ)/%.test.o: $(TEST)/%.cpp
 .PHONY: @DEB@
 @DEB@: $(BUILD)/apm
 # Script accepts a root directory of the package.
-	@scripts/make-deb.sh 'deb'
+	@scripts/make-deb.sh deb
 
 .PHONY: clean
 clean:
-	@rm -rf autom4te.cache/ $(BUILD) config.log config.status
+	@$(UNIX_PREFIX)rm -rf autom4te.cache/ $(BUILD) config.log config.status
 
 # This rule also remove downloaded libraries, Vim session file and
 # auto-generated files by "autoreconf" and "./configure".
 .PHONY: full-clean
 full-clean: clean
-	@rm -rf $(LIB) scripts/make-deb.sh aclocal.m4 configure Makefile .session.vim
+	@$(UNIX_PREFIX)rm -rf $(LIB) scripts/make-deb.sh aclocal.m4 configure Makefile .session.vim
