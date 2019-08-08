@@ -109,5 +109,5 @@ before_script:
 script:
   # -e — preferably use environment variables.
   # Empty the DEFAULT_FLAGS variable for clean release build.
-  - autoreconf -fi && ./configure && make DEFAULT_FLAGS= -ej$(THREADS) libs deb
-  - make -ej$(THREADS) clean debug test && build/test
+  - autoreconf -fi && ./configure && make DEFAULT_FLAGS= -ej$THREADS libs deb
+  - make -ej$THREADS clean debug test && build/test
